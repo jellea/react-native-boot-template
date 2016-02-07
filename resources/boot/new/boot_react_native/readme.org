@@ -1,0 +1,84 @@
+* Boot React Native
+
+[[https://clojars.org/mattsum/boot-react-native][https://img.shields.io/clojars/v/mattsum/boot-react-native.svg]]
+
+Provides several tasks that helps integrate ClojureScript with the React Native packager and build process
+** Why?
+React Native and ClojureScript seem to be made for each other. Unfortunately, out of the box ClojureScript does not play nice with React Native.
+
+Basically, trying to get them to work together leads to the following problems:
+ * You have to set up the cljs compiler to use :optimizations :whitespace or higher - this leads to slow compilation (more than 30 seconds after each change on my PC)
+ * boot-reload and boot-cljs-repl tasks do not work
+ * You have to start up the React Native packager in a separate terminal
+
+This library aims to fix all of the above. It:
+ * Allows for builds with :optimizations :none - much faster builds, and 1-2 second rebuilds
+ * Allows for integration with other cljs boot tasks - cljs-repl, reload, cljs-test
+ * Provides tasks to auto start react native packager
+ * Custom transformer for react-native to speed up builds significantly
+ * Logging server to allow for capturing console.log output on command line
+** Features
+*** Hot reloading
+Automatically reloads cljs files as you edit them. Better than normal React Native reloading because it keeps your application state, and just changes the behaviour.
+
+Hot reloading works in both Chrome Debug mode and normal mode.
+*** NRepl support
+Integrates with normal nrepl process:
+ * Setup your build pipeline (see example app)
+ * Start your build pipeline (=boot dev= in example app)
+ * In another terminal, connect to repl using =boot repl -c=
+** How to use?
+Simply add the tasks =(before-cljsbuild)= to your build pipeline somewhere before =(cljs)=, and =(after-cljsbuild)= to somewhere after =(cljs)=. There is an example in the example directory that illustrates this - here's the main task from the example:
+
+#+BEGIN_SRC clojure
+(deftask dev []
+  (comp (serve :handler 'mattsum.simple-log-server/log
+               :port 8000)
+        (watch)
+        (reload :on-jsload 'mattsum.simple-example.core/on-js-reload
+                :port 8079
+                :ws-host "matt-dev"
+                )
+        (rn/before-cljsbuild)
+
+        (cljs-repl :ws-host "matt-dev"
+                   :ip "0.0.0.0")
+
+        (cljs :main "mattsum.simple-example.core")
+        (rn/after-cljsbuild :server-url "matt-dev:8081")
+        ))
+#+END_SRC
+
+* Limitations
+ALPHA quality - task names, api, etc can and probably will still change. Lots of testing still needs to be done. Several additional features are planned.
+
+This should work with Android and IOS. However, so far it has only been tested with Android.
+* Example App
+There is an example app to demonstrate using this plugin.
+
+To start it up:
+ * Run =npm install= inside example/app
+ * Run =boot fast-build= inside example
+ * Install app on your phone/emulator (should be connected via adb) - =(cd example/app/android && ./gradlew installDebug "$@")=
+ * Replace all references to matt-dev to your computer's hostname in build.boot
+ * If using watchman you might have to restart it
+
+* Hacking
+
+To hack on boot-react-native, simply:
+ * run =boot dev= in one terminal. This watches and automatically rebuilds the
+   boot task and installs the jar in the local maven repository.
+ * In another terminal, run =cd example && boot fast build= to build the example
+   app. This way, changes to the boot task are automatically picked up.
+
+* Acknowledgements/Resources
+ * A lot/most of the work with regards to hot reloading came from [[https://github.com/decker405/figwheel-react-native][decker405]].
+ * Also got a lot of info from [[https://github.com/mfikes/reagent-react-native/][mfikes]], [[https://github.com/chendesheng/ReagentNativeDemo][chendesheng]], [[https://github.com/Gonzih/reagent-native][Gonzih]] and [[https://github.com/nicholaskariniemi/ReactNativeCljs][nicholaskariniemi]].
+ * [[http://cljsrn.org/][Here's]] another great resource with information about ClojureScript and React Native that helped a lot.
+ * Several other projects here on GitHub that I can't find at the moment.
+
+* License
+
+Copyright © 2015 Matt Meintjes
+
+Distributed under the Eclipse Public License, the same as Clojure.

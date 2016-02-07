@@ -1,0 +1,11 @@
+{
+  "name": "SimpleExampleApp",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "react-native start"
+  },
+  "dependencies": {
+    "react-native": "https://github.com/facebook/react-native.git#8638f6a735a8842486a44f9f5527faa14d2c2dec"
+  }
+}
