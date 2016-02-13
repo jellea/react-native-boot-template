@@ -2,8 +2,8 @@
 (def version "0.1.0-SNAPSHOT")
 
 (set-env! :resource-paths #{"resources" "src"}
-          :source-paths   #{"test"}
           :dependencies   '[[org.clojure/clojure "RELEASE"]
+                            [cpath-clj "0.1.2"]
                             [seancorfield/boot-new "RELEASE"]
                             [camel-snake-kebab "0.3.2"]
                             [adzerk/bootlaces "0.1.13" :scope "test"]
