@@ -1,6 +1,7 @@
 (ns boot.new.boot-react-native
   (:require [clojure.string :as str]
             [clojure.java.io :as io]
+            [clojure.java.shell :as shell]
             [cpath-clj.core :as cp]
             [camel-snake-kebab.core :as kebab]
             [boot.new.templates :refer [renderer name-to-path ->files]]))
@@ -23,17 +24,28 @@
      "mattsum.simple-example" (:name data)
      "SimpleExampleApp" (:capitalized data)}))
 
+(defn copy-files [data path]
+  (apply (partial ->files data)
+    (->> (list-files path)
+      (mapv #(vector (sandr (get-rel-path (.toString %) #"boot/new/boot_react_native/example/") data)
+              (sandr (slurp %) data))))))
+
 (defn boot-react-native
   "Main function. Moves and search/replaces files from resources."
   [name]
   (let [data {:name name
               :sanitized (name-to-path name)
-              :capitalized (kebab/->PascalCase name)}
-        example-folder "boot/new/boot_react_native/"]
+              :capitalized (kebab/->PascalCase name)}]
 
-    (println "Generating fresh 'boot new' boot-react-native project.")
+    (println "Generating fresh boot-react-native project.")
+    (println "Copying files")
+    (copy-files data "boot/new/boot_react_native/")
 
-    (apply (partial ->files data)
-      (->> (list-files example-folder)
-        (mapv #(vector (sandr (get-rel-path (.toString %) #"boot/new/boot_react_native/example/") data)
-                (sandr (slurp %) data)))))))
+    ;; TODO: stop "jar:file:" from being generated.
+    (shell/with-sh-dir name (shell/sh "rm" "-rf" "jar:file:"))
+
+    (println "Running `npm install`")
+    (if-let [error (:err (shell/with-sh-dir (str name "/app") (shell/sh "npm" "install")))]
+      (println "Error:" error)
+      (println "Project generated succesfully. `cd " name "` and `boot dev --platform ios` to start dev"))))
+

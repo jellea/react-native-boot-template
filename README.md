@@ -1,20 +1,26 @@
 # boot-react-native-template
 
 A Boot template for [`boot-react-native`](https://github.com/mjmeintjes/boot-react-native).
+Currently only iOS works.
 
 ## Usage
 
-Use the version from Clojars:
+Use the snapshot version from Clojars:
+
 ```
-boot -d seancorfield/boot-new new -t boot-react-native -n name-of-your-app
+boot -d seancorfield/boot-new new -t boot-react-native -n name-of-your-app -S
 cd name-of-your-app
 boot dev --platform ios
 ```
 
-Test locally:
+Test locally with reload:
 ```
-make test
+boot watch build
 ```
+
+## TODO
+[] - Use boot-react-native directly from clojars instead of git subtree.
+[] - Fix Android (need help, never did Android!)
 
 ## License
 
