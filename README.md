@@ -19,8 +19,8 @@ boot watch build
 ```
 
 ## TODO
-[] - Use boot-react-native directly from clojars instead of git subtree.
-[] - Fix Android (need help, never did Android!)
+- [ ] Use boot-react-native directly from clojars instead of git subtree.
+- [ ] Fix Android (need help, never did Android!)
 
 ## License
 
